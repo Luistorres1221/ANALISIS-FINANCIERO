@@ -1,0 +1,48 @@
+<div class="page-head">
+  <h1>Dashboard</h1>
+  <p class="sub">Resumen del portafolio y lectura rápida del riesgo agregado.</p>
+</div>
+
+@if (!status.dataReady() && status.syncState() === 'refreshing') {
+  <app-page-skeleton [height]="200" />
+} @else if (!status.dataReady()) {
+  <div class="empty">
+    Ejecute el ETL desde la barra superior para cargar métricas y gráficas.
+  </div>
+} @else {
+  <div class="grid-metrics">
+    <app-metric-card label="Activos" [value]="metrics().activos" />
+    <app-metric-card label="Filas dataset" [value]="metrics().obs" hint="Precios alineados por fecha" />
+    <app-metric-card label="Volatilidad media" [value]="metrics().avgVol" />
+    <app-metric-card label="Volatilidad máx" [value]="metrics().maxVol" />
+    <app-metric-card label="Activos agresivos" [value]="metrics().agresivos" hint="Clasificación de riesgo" />
+  </div>
+
+  <div class="charts">
+    <div class="chart-card">
+      <h2>Top volatilidad</h2>
+      <div class="chart-host">
+        <canvas baseChart [data]="volBar().data" [options]="volBar().options" [type]="volBar().type"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <h2>Serie de precios (referencia)</h2>
+        <label class="sym-picker">
+          Activo
+          <select
+            [value]="priceChartSymbol()"
+            (change)="priceChartSymbol.set($any($event.target).value)"
+          >
+            @for (s of status.symbols(); track s) {
+              <option [value]="s">{{ s }}</option>
+            }
+          </select>
+        </label>
+      </div>
+      <div class="chart-host">
+        <canvas baseChart [data]="priceLine().data" [options]="priceLine().options" [type]="priceLine().type"></canvas>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,12 @@
+<div class="page-head">
+  <h1>Dataset unificado</h1>
+  <p class="sub">Precios de cierre alineados por fecha para todos los símbolos del portafolio.</p>
+</div>
+
+@if (!status.dataReady() && status.syncState() === 'refreshing') {
+  <app-page-skeleton [height]="240" />
+} @else if (!status.dataReady()) {
+  <div class="empty">No hay datos hasta ejecutar el ETL.</div>
+} @else {
+  <app-data-table [columns]="columns()" [rows]="rows()" />
+}

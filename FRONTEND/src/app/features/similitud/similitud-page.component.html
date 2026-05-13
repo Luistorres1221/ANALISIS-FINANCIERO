@@ -1,0 +1,92 @@
+<div class="page-head">
+  <h1>Similitud entre activos</h1>
+  <p class="sub">Métricas sobre retornos alineados: Euclidiana, Pearson, coseno y DTW.</p>
+</div>
+
+@if (status.symbols().length < 2) {
+  <div class="empty">Se necesitan símbolos del backend. Compruebe la conexión o ejecute el ETL.</div>
+} @else {
+  <div class="panel">
+    <div class="row">
+      <label>
+        Activo 1
+        <select [value]="asset1()" (change)="asset1.set($any($event.target).value)">
+          @for (s of status.symbols(); track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Activo 2
+        <select [value]="asset2()" (change)="asset2.set($any($event.target).value)">
+          @for (s of status.symbols(); track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Desde
+        <input type="date" [value]="dateFrom()" (change)="dateFrom.set($any($event.target).value)" />
+      </label>
+      <label>
+        Hasta
+        <input type="date" [value]="dateTo()" (change)="dateTo.set($any($event.target).value)" />
+      </label>
+      <button type="button" class="btn primary" (click)="compare()" [disabled]="loading() || !status.dataReady()">
+        @if (loading()) { Calculando… } @else { Comparar }
+      </button>
+      <button type="button" class="btn ghost" (click)="loadSeries()" [disabled]="seriesLoading() || !status.dataReady()">
+        @if (seriesLoading()) { Cargando… } @else { Ver series de retornos }
+      </button>
+    </div>
+    @if (error()) {
+      <p class="err">{{ error() }}</p>
+    }
+  </div>
+
+  @if (!status.dataReady()) {
+    <app-page-skeleton [height]="120" />
+  }
+
+  @if (result(); as r) {
+    <div class="interpret">
+      <strong>Interpretación (Pearson):</strong>
+      {{ r.interpretacion }}
+    </div>
+    <div class="raw-grid">
+      <div><span class="k">Euclidiana</span> {{ fmt(r.euclidiana) }}</div>
+      <div><span class="k">Pearson</span> {{ fmt(r.pearson) }}</div>
+      <div><span class="k">Coseno</span> {{ fmt(r.coseno) }}</div>
+      <div><span class="k">DTW</span> {{ fmt(r.dtw) }}</div>
+    </div>
+    @if (similarityBarChart(); as bc) {
+      <div class="chart-card">
+        <h2>Comparación visual</h2>
+        <p class="chart-note">
+          Las barras escalan las cuatro métricas al mismo rango (la mayor llega al 100&nbsp;%). Los valores exactos están arriba y en el tooltip al pasar el cursor.
+        </p>
+        <div class="chart-host">
+          <canvas
+            baseChart
+            [type]="'bar'"
+            [labels]="bc.labels"
+            [datasets]="bc.datasets"
+            [options]="bc.options"
+          ></canvas>
+        </div>
+      </div>
+    }
+  }
+
+  @if (seriesChart(); as sc) {
+    <div class="chart-card">
+      <h2>Retornos diarios alineados</h2>
+      <p class="chart-note">
+        Eje X: fechas del dataset (ISO). Eje Y: retorno diario (P<sub>t</sub> − P<sub>t−1</sub>) / P<sub>t−1</sub>.
+      </p>
+      <div class="chart-host tall">
+        <canvas baseChart [data]="sc.data" [options]="sc.options" [type]="sc.type"></canvas>
+      </div>
+    </div>
+  }
+}

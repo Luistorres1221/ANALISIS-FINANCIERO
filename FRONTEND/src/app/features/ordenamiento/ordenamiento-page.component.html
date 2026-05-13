@@ -1,0 +1,89 @@
+<div class="page-head">
+  <h1>Benchmark de ordenamiento</h1>
+  <p class="sub">
+    Comparación de los algoritmos según el tiempo medido; barras en orden ascendente de izquierda a derecha (más rápido a la izquierda).
+  </p>
+</div>
+
+<div class="toolbar">
+  <label class="field">
+    <span class="field-label">Tamaño del arreglo (parámetro <code>size</code>)</span>
+    <input
+      type="number"
+      min="1"
+      [ngModel]="sizeInput()"
+      (ngModelChange)="onSizeChange($event)"
+      class="input"
+    />
+  </label>
+  <button type="button" class="btn primary" (click)="load()" [disabled]="loading()">
+    @if (loading()) { Cargando… } @else { Ejecutar benchmark }
+  </button>
+</div>
+
+@if (error(); as err) {
+  <div class="banner banner--error" role="alert">{{ err }}</div>
+}
+
+@if (loading() && !rows()) {
+  <app-page-skeleton [height]="420" />
+} @else if (rows(); as data) {
+  <div class="chart-card">
+    <div class="chart-host">
+      <canvas
+        baseChart
+        [data]="sortBar().data"
+        [options]="sortBar().options"
+        [type]="sortBar().type"
+      ></canvas>
+    </div>
+  </div>
+  <p class="meta">{{ data.length }} algoritmos · orden ascendente por tiempo</p>
+}
+
+<section class="volume-section">
+  <div class="section-head">
+    <h2>Top 15 días de mayor volumen</h2>
+    <button type="button" class="btn ghost" (click)="loadTopVolumeDays()" [disabled]="loadingTopVolume()">
+      @if (loadingTopVolume()) { Cargando… } @else { Actualizar }
+    </button>
+  </div>
+  <p class="sub">Listado ascendente por volumen (del menor al mayor dentro del top 15).</p>
+
+  @if (topVolumeError(); as err) {
+    <div class="error">{{ err }}</div>
+  } @else if (loadingTopVolume() && !topVolumeDays().length) {
+    <app-page-skeleton [height]="220" />
+  } @else if (topVolumeDays().length) {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Símbolo</th>
+            <th>Fecha</th>
+            <th>Apertura</th>
+            <th>Cierre</th>
+            <th>Máximo</th>
+            <th>Mínimo</th>
+            <th>Volumen</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of topVolumeDays(); track row.symbol + row.date + row.volume) {
+            <tr>
+              <td>{{ row.symbol }}</td>
+              <td>{{ row.date }}</td>
+              <td>{{ row.open.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</td>
+              <td>{{ row.close.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</td>
+              <td>{{ row.high.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</td>
+              <td>{{ row.low.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</td>
+              <td>{{ row.volume.toLocaleString('es-CO') }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="empty">No hay registros de volumen para mostrar.</div>
+  }
+</section>

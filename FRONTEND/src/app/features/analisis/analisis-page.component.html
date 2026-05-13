@@ -1,0 +1,12 @@
+<div class="page-head">
+  <h1>Riesgo y patrones</h1>
+  <p class="sub">Ranking por volatilidad anualizada, clasificación y conteo de patrones en retornos.</p>
+</div>
+
+@if (!status.dataReady() && status.syncState() === 'refreshing') {
+  <app-page-skeleton [height]="220" />
+} @else if (!status.dataReady()) {
+  <div class="empty">Ejecute el ETL para ver el análisis del requerimiento 3.</div>
+} @else {
+  <app-data-table [columns]="columns" [rows]="rows()" />
+}

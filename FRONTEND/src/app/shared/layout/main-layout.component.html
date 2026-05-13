@@ -1,0 +1,69 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark"></span>
+      <div>
+        <div class="brand-title">QUANTA LTDA.</div>
+        <div class="brand-sub">Analisis Algoritmicos</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
+      <a routerLink="/activos" routerLinkActive="active">Activos</a>
+      <a routerLink="/similitud" routerLinkActive="active">Similitud</a>
+      <a routerLink="/analisis" routerLinkActive="active">Riesgo y patrones</a>
+      <a routerLink="/visualizaciones" routerLinkActive="active">Correlación y velas</a>
+      <a routerLink="/ordenamiento" routerLinkActive="active">Métodos de ordenamiento</a>
+    </nav>
+  </aside>
+  <div class="main-col">
+    <header class="topbar">
+      <div class="topbar-left">
+        <span
+          class="status-dot"
+          [class.status-dot--ok]="status.dataReady() && status.syncState() === 'idle'"
+          [class.status-dot--busy]="status.syncState() === 'refreshing' || status.etlStatus()?.estado === 'EJECUTANDO'"
+          [class.status-dot--err]="status.etlStatus()?.estado === 'ERROR' || status.syncState() === 'error' || !!status.lastPollError()"
+          aria-hidden="true"
+        ></span>
+        <span class="status-text">{{ status.uiStatusLabel() }}</span>
+        <span class="sep">·</span>
+        <span class="muted">Última carga exitosa (servidor):</span>
+        <span class="mono">{{ status.lastUpdateDisplay() }}</span>
+        @if (status.showingPreviousDataWhileEtl()) {
+          <span class="stale-hint">(mostrando datos anteriores hasta terminar el ETL)</span>
+        }
+        <span class="sep">·</span>
+        <span class="muted">{{ status.statusPollHint() }}</span>
+        <span class="sep">·</span>
+        <span class="muted">{{ status.autoRefreshHint() }}</span>
+      </div>
+      <div class="topbar-actions">
+        @if (getCurrentUser(); as user) {
+          <div class="user-info">
+            <span class="user-name">{{ user.nombre }} {{ user.apellido }}</span>
+            <span class="user-role" [class.role-admin]="user.rol === 'ADMIN'">{{ user.rol }}</span>
+          </div>
+        }
+        <button type="button" class="btn ghost" (click)="refresh()" [disabled]="status.syncState() === 'refreshing'">
+          Refrescar
+        </button>
+        <button type="button" class="btn primary" (click)="runEtl()" [disabled]="runBusy() || status.etlStatus()?.estado === 'EJECUTANDO'">
+          @if (runBusy()) { Ejecutando… } @else { Ejecutar ETL }
+        </button>
+        <button type="button" class="btn ghost logout" (click)="logout()">
+          Cerrar Sesión
+        </button>
+      </div>
+    </header>
+    @if (globalError.message(); as err) {
+      <div class="banner banner--error" role="alert">
+        <span>{{ err }}</span>
+        <button type="button" class="btn ghost sm" (click)="dismissError()">Cerrar</button>
+      </div>
+    }
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+</div>
